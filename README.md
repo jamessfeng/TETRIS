@@ -2,4 +2,4 @@
 
 pip3 install pygame
 
-./tetris export DISPLAY=localhost:0:0
+./tetris.py export DISPLAY=localhost:0:0
