@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 #Tetris
-
+# James Feng
 import pygame
 import os
+import random
 from abc import ABC, abstractmethod
 
 os.environ['SDL_AUDIODRIVER'] = 'dummy'
@@ -16,9 +17,7 @@ BLUE = (0, 0, 255)
 GREY = (169,169,169)
 
 bSide =30
-bMargin = bSide/10 
-global counter 
-counter = 0
+bMargin = 2 #bSide/10
 
 # TYPES OF PIECES 
 # Line , T , Cube, Z , Z flip, L flip
@@ -38,29 +37,33 @@ class main(object):
         self.playtime = 0.0
         self.font = pygame.font.SysFont('mono', 20, bold=True)
         self.grid = self.init_grid()
-        self.floor = [19 for x in range(10)]
-        # print("ground"+self.ground)
-        #self.draw_grid()
-        #self.print_grid()
-        #Line(self.grid)
-        #self.draw_grid()
-        #self.print_grid()
-        #print(self.grid)
-    def run(self):
-        # fb = Line(self.grid)
-        #print(fb.block_id)
-        # block = Block()
-        # print(block)
-        # #self.gravity(1)
+        self.floor = [19 for x in range(10)] #floor is greatest free block of that column
+        self.fallingBlock = True
 
-        # Cell([2,0], self.grid)
+    def run(self):
         n = 0
-        currPiece = Piece(1, self.grid)
-        #print(currPiece.blocks)
+        # Cell([3,19], self.grid)
+        # Cell([4,19], self.grid)
+        # Cell([5,19], self.grid)
+        # Cell([6,19], self.grid)
+        # Cell([3,18], self.grid)
+        # Cell([4,18], self.grid)
+        # Cell([5,18], self.grid)
+        # Cell([6,18], self.grid)
+        self.test()
         self.print_grid()
-        self.gravity(currPiece)
+        self.floor_update()
+        print(self.floor)
+        #print(self.floor)
         print("asdfasdfasd")
-        self.print_grid()
+
+
+        currPiece = Piece(1, self.grid)
+        # self.move_right(currPiece)
+        # self.move_right(currPiece)
+        # print(currPiece.blocks)
+        # self.gravity(currPiece)
+        #self.print_grid()
         #cPiece = Piece(8, self.grid)
         #print(self.floor_check(currPiece))
         time_elapsed_since_last_action = 0
@@ -76,12 +79,25 @@ class main(object):
 
             milliseconds = self.clock.tick(self.fps)
             self.playtime += milliseconds / 1000
+            if self.fallingBlock is True:
 
-            if (n == 0): self.gravity(currPiece)
-            n += 1
-            if (n > 10): n = 0
-            self.gravity(currPiece)
-            #pygame.time.delay(50)
+                if (n == 0): self.gravity(currPiece)
+                n += 1
+                if (n > 4): n = 0
+            else:
+                rand = random.randint(1,7)
+                currPiece = Piece(rand, self.grid)
+                self.piece_to_board(currPiece)
+                self.fallingBlock = True
+            #     pass
+
+            key = pygame.key.get_pressed()
+            
+            if key[pygame.K_RIGHT]:
+                self.move_right(currPiece)
+            elif key[pygame.K_LEFT]:
+                self.move_left(currPiece)
+            # pygame.time.delay(50)
 
             # dt = self.clock.tick() 
             # time_elapsed_since_last_action += dt
@@ -93,7 +109,7 @@ class main(object):
                            # self.clock.get_fps(), " "*5, self.playtime)), 1)
             #pygame.display.flip()
             #self.screen.blit(self.background, (0, 0))
-
+            # self.floor_update()
             self.draw_grid()
             #Line(self.grid)
 
@@ -137,25 +153,96 @@ class main(object):
         if self.floor_check(piece) == True:
             for block in piece.blocks:
                 #print(str(block))
+                self.grid[block.y][block.x] = 0 
                 block.y += 1
-                self.sync_pieceboard(piece)
+            for block in piece.blocks:
+                self.grid[block.y][block.x] = 2
                 # print(block.x, block.y)
+            #self.sync_pieceboard(piece)
+            self.print_grid()
+            print("\n")
         else:
-            pass
+            self.fallingBlock = False
+            self.uncurrent(piece)
+            self.floor_update()
+            print("floor", self.floor)
+            self.print_grid()
+            print("\n")
+            # self.next_block()
+    def move_right(self, piece):
+        if self.check_right(piece) == True:
+            for block in piece.blocks:
+                self.grid[block.y][block.x] = 0 
+                block.x += 1
+            for block in piece.blocks:
+                self.grid[block.y][block.x] = 2 
+
+    def check_right(self, piece): 
+        # you cant move right if theres something blocking i.e. end of game or existing blocks
+        for block in piece.blocks:        
+            if block.x == 9:
+                return False
+        for block in piece.blocks:
+            if self.grid[block.y][block.x + 1] == 1:
+                return False
+        return True
+    def move_left(self, piece):
+        if self.check_left(piece) == True:
+            for block in piece.blocks:
+                self.grid[block.y][block.x] = 0 
+                block.x -= 1
+            for block in piece.blocks:
+                self.grid[block.y][block.x] = 2 
+
+    def check_left(self, piece): 
+        # you cant move right if theres something blocking i.e. end of game or existing blocks
+        for block in piece.blocks:        
+            if block.x == 0:
+                return False
+        for block in piece.blocks:
+            if self.grid[block.y][block.x - 1] == 1:
+                return False
+        return True
+    def rotate():
+        pass
+    def rotate_check():
+        pass        
     def next_block(self):
         pass
     def sync_pieceboard(self, piece):
         for block in piece.blocks:
+            #if block.y == :
+
             self.grid[block.y-1][block.x] = 0
-            self.grid[block.y][block.x] = 1
+            self.grid[block.y][block.x] = 2
 
     def floor_check(self, piece):
+        # if block1 || block2 || block3 || block4 == floor 
+        #if piece.blocks[0].b1[1]
+        #print(piece.blocks[0].y)
         for block in piece.blocks:
             if block.y >= self.floor[block.x]:
                 #print(block.y + self.floor[block.x])
                 return False
         return True
 
+    def floor_update(self):
+        for row in range(0, 10):
+            for column in range(0, 19):
+                if self.grid[column+1][row] == 1:
+                    self.floor[row] = column
+                    break
+    def test(self):
+        for x in range (0,20):
+            print(x, self.grid[x][3])
+    def uncurrent(self, piece):
+        for block in piece.blocks:
+            self.grid[block.y][block.x] = 1
+    def cell_to_board(self, cell):
+        self.grid[cell.y][cell.x]
+    def piece_to_board(self, piece):
+        for block in piece.blocks:
+            self.cell_to_board(block)
     def print_grid(self):
         for array in self.grid:
             print(array)
@@ -167,7 +254,7 @@ class Cell():
     def __init__(self, cords, grid):
         self.x = cords[0]
         self.y = cords[1]
-        grid[self.y][self.x] = 1
+        #grid[self.y][self.x] = 2
 
     def __str__(self):
         return "[" + str(self.x) + "," + str(self.y) + "]"
@@ -180,13 +267,13 @@ class Piece():
     """docstring for Piece"""
     def __init__(self, p_type, grid):
         if (p_type == 1):
-            self.b1 = Cell([3,0], grid)
-            self.b2 = Cell([4,0], grid)
+            self.b2 = Cell([3,0], grid)
+            self.b1 = Cell([4,0], grid)
             self.b3 = Cell([5,0], grid)
             self.b4 = Cell([6,0], grid) 
         elif (p_type == 2):
-            self.b1 = Cell([4,0], grid)        
-            self.b2 = Cell([5,0], grid)
+            self.b2 = Cell([4,0], grid)        
+            self.b1 = Cell([5,0], grid)
             self.b3 = Cell([6,0], grid)
             self.b4 = Cell([5,1], grid)
         elif (p_type == 3):
@@ -195,24 +282,24 @@ class Piece():
             self.b3 = Cell([4,1], grid)
             self.b4 = Cell([5,1], grid)
         elif (p_type == 4):
-            self.b1 = Cell([4,0], grid)        
-            self.b2 = Cell([5,0], grid)
+            self.b2 = Cell([4,0], grid)        
+            self.b1 = Cell([5,0], grid)
             self.b3 = Cell([5,1], grid)
-            self.b4 = Cell([6,2], grid)
+            self.b4 = Cell([6,1], grid)
         elif (p_type == 5):
             self.b1 = Cell([5,0], grid)        
             self.b2 = Cell([6,0], grid)
             self.b3 = Cell([4,1], grid)
             self.b4 = Cell([5,1], grid)
         elif (p_type == 6):
-            self.b1 = Cell([4,0], grid)        
+            self.b3 = Cell([4,0], grid)        
             self.b2 = Cell([5,0], grid)
-            self.b3 = Cell([6,0], grid)
+            self.b1 = Cell([6,0], grid)
             self.b4 = Cell([4,1], grid)
         elif (p_type == 7):
-            self.b1 = Cell([4,0], grid)        
+            self.b3 = Cell([4,0], grid)        
             self.b2 = Cell([5,0], grid)
-            self.b3 = Cell([6,0], grid)
+            self.b1 = Cell([6,0], grid)
             self.b4 = Cell([6,1], grid)
         #TEST BLOCK
         elif (p_type == 8):  
