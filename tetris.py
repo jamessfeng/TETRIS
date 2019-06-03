@@ -47,10 +47,10 @@ class main(object):
         # Cell([5,19], self.grid)
         # Cell([6,19], self.grid)
         # Cell([3,18], self.grid)
-        # Cell([4,18], self.grid)
+        #a = Cell([4,18], self.grid)
         # Cell([5,18], self.grid)
         # Cell([6,18], self.grid)
-        self.test()
+        # self.test()
         self.print_grid()
         self.floor_update()
         print(self.floor)
@@ -58,7 +58,9 @@ class main(object):
         print("asdfasdfasd")
 
 
-        currPiece = Piece(1, self.grid)
+        currPiece = Piece(8, self.grid)
+        self.piece_to_board(currPiece)
+        self.rotate(currPiece)
         # self.move_right(currPiece)
         # self.move_right(currPiece)
         # print(currPiece.blocks)
@@ -79,24 +81,34 @@ class main(object):
 
             milliseconds = self.clock.tick(self.fps)
             self.playtime += milliseconds / 1000
-            if self.fallingBlock is True:
+            # if self.fallingBlock is True:
 
-                if (n == 0): self.gravity(currPiece)
-                n += 1
-                if (n > 4): n = 0
-            else:
-                rand = random.randint(1,7)
-                currPiece = Piece(rand, self.grid)
-                self.piece_to_board(currPiece)
-                self.fallingBlock = True
+            #     if (n == 0): self.gravity(currPiece)
+            #     n += 1
+            #     if (n > 4): n = 0
+            # else:
+            #     rand = random.randint(1,7)
+            #     currPiece = Piece(rand, self.grid)
+            #     self.piece_to_board(currPiece)
+            #     self.fallingBlock = True
             #     pass
+
+            if (n == 0): self.rotate(currPiece)
+            n += 1
+            if (n > 8): n = 0            
 
             key = pygame.key.get_pressed()
             
             if key[pygame.K_RIGHT]:
                 self.move_right(currPiece)
+                #self.remove_cell_grid(a)
             elif key[pygame.K_LEFT]:
                 self.move_left(currPiece)
+            elif key[pygame.K_UP]:
+                self.rotate(currPiece)
+                #self.print_grid()
+                #print("\n")
+
             # pygame.time.delay(50)
 
             # dt = self.clock.tick() 
@@ -203,11 +215,41 @@ class main(object):
             if self.grid[block.y][block.x - 1] == 1:
                 return False
         return True
-    def rotate():
-        pass
-    def rotate_check():
-        pass        
-    def next_block(self):
+    def rotate(self, piece):
+        for block in piece.blocks:
+            # if piece.pivot == block:
+            #     pass
+            # else:
+            diffx = piece.pivot.x - block.x
+            y = piece.pivot.y + diffx
+            #diffy = piece.pivot.y - block.y
+            diffy = block.y - piece.pivot.y
+            x = piece.pivot.x + diffy
+            print(block, x, y)
+            # print(y, piece.pivot.y, diffx)
+            # print(x, piece.pivot.x, diffy)
+            print(piece.pivot.x, piece.pivot.y, "pivot")
+            print("diffy = pivot.y - block.y")
+            print(diffy , "=" , piece.pivot.y , "-" , block.y)
+            print("x = pivot.x - diffy")
+            print(x , "=" , piece.pivot.x , "+" , diffy)  
+            self.remove_cell_grid(block)
+            # newcord = [y,x]
+            block.x = x
+            block.y = y
+            #test = Cell(newcord, self.grid)
+            #piece
+
+        self.piece_to_board(piece)
+        # self.piece_to_board(piece)
+
+        
+    def remove_cell_grid(self, Cell):
+        self.grid[Cell.y][Cell.x] = 0
+
+    def rotate_check(self, cords):
+        #[[-1,0], [9,2], [6,6], [9,19]]
+        #for cord in cords:
         pass
     def sync_pieceboard(self, piece):
         for block in piece.blocks:
@@ -232,17 +274,19 @@ class main(object):
                 if self.grid[column+1][row] == 1:
                     self.floor[row] = column
                     break
-    def test(self):
-        for x in range (0,20):
-            print(x, self.grid[x][3])
+    # def test(self):
+    #     for x in range (0,20):
+    #         print(x, self.grid[x][3])
     def uncurrent(self, piece):
         for block in piece.blocks:
             self.grid[block.y][block.x] = 1
     def cell_to_board(self, cell):
-        self.grid[cell.y][cell.x]
+        #print(cell.y, cell.x)
+        self.grid[cell.y][cell.x] = 2
     def piece_to_board(self, piece):
         for block in piece.blocks:
             self.cell_to_board(block)
+            # print(block)
     def print_grid(self):
         for array in self.grid:
             print(array)
@@ -250,12 +294,10 @@ class main(object):
         pygame.draw.rect(self.screen, Colour, (width, height, bSide, bSide))
 
 class Cell():
-    """docstring for Block"""
     def __init__(self, cords, grid):
         self.x = cords[0]
         self.y = cords[1]
         #grid[self.y][self.x] = 2
-
     def __str__(self):
         return "[" + str(self.x) + "," + str(self.y) + "]"
 
@@ -303,10 +345,10 @@ class Piece():
             self.b4 = Cell([6,1], grid)
         #TEST BLOCK
         elif (p_type == 8):  
-            self.b1 = Cell([4,5], grid)        
-            self.b2 = Cell([5,5], grid)
-            self.b3 = Cell([6,5], grid)
-            self.b4 = Cell([6,19], grid)
+            self.b2 = Cell([3,13], grid)        
+            self.b1 = Cell([4,13], grid)
+            self.b3 = Cell([5,13], grid)
+            self.b4 = Cell([6,13], grid)
         self.pivot = self.b1
         self.blocks = [self.b1, self.b2, self.b3, self.b4]
         #print(self.blocks)
